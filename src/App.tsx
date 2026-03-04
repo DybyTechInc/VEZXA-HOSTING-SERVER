@@ -523,7 +523,7 @@ export default function App() {
                   <div className="w-10 h-10 bg-[#25D366]/20 rounded-xl flex items-center justify-center">
                     <MessageSquare className="w-5 h-5 text-[#25D366]" />
                   </div>
-                  <span className="font-bold text-white">FSP PTERO Channel 1</span>
+                  <span className="font-bold text-white">SUKUNA CHANNEL</span>
                 </div>
                 {joinedCh1 ? <CheckCircle className="w-5 h-5 text-emerald-500" /> : <ExternalLink className="w-4 h-4 text-zinc-500 group-hover:text-emerald-500" />}
               </a>
@@ -539,7 +539,7 @@ export default function App() {
                   <div className="w-10 h-10 bg-[#25D366]/20 rounded-xl flex items-center justify-center">
                     <MessageSquare className="w-5 h-5 text-[#25D366]" />
                   </div>
-                  <span className="font-bold text-white">FSP PTERO Channel 2</span>
+                  <span className="font-bold text-white">DEV DYBY CHANNEL</span>
                 </div>
                 {joinedCh2 ? <CheckCircle className="w-5 h-5 text-emerald-500" /> : <ExternalLink className="w-4 h-4 text-zinc-500 group-hover:text-emerald-500" />}
               </a>
@@ -1176,7 +1176,7 @@ export default function App() {
       {/* Footer */}
       <footer className="relative z-10 py-8 border-t border-white/5 text-center">
         <p className="text-zinc-600 text-[10px] font-black tracking-[0.3em] uppercase">
-          &copy; 2024 FSP PTERO &bull; Powered by Pterodactyl
+          &copy; 𝙿𝙾𝚆𝙴𝚁𝙴𝙳 𝙱𝚈 𝙳𝙴𝚅 𝙳𝚈𝙱𝚈
         </p>
       </footer>
     </div>
