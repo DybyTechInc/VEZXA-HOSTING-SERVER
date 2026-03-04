@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://Sukunadelaputa_db_user:WnvrX8HlALbZqTb5@cluster0.rpfgt3j.mongodb.net/fsp_db?retryWrites=true&w=majority";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://dinuxx95_db:ipSgSOqHdNg1HuG0@cluster00.gohclgg.mongodb.net/dinu?retryWrites=true&w=majority&appName=Cluster00";
 
 export const connectDB = async () => {
   try {
@@ -46,6 +46,7 @@ const userSchema = new mongoose.Schema({
   referrer_id: { type: String },
   is_admin: { type: Number, default: 0 },
   is_banned: { type: Number, default: 0 },
+  last_daily_reward: { type: Date },
   created_at: { type: Date, default: Date.now }
 });
 

@@ -28,6 +28,9 @@ import {
   RotateCcw,
   Activity,
   Calendar,
+  Gift,
+  TrendingUp,
+  Clock,
 } from 'lucide-react';
 import { PTERO_CONFIG } from './constants';
 
@@ -71,6 +74,7 @@ const TEXTS = {
     servers: "Mes Serveurs",
     shop: "Boutique",
     referral: "Parrainage",
+    earn: "Gagner des Coins",
     support: "Support",
     buy: "Acheter",
     delete: "Supprimer",
@@ -115,6 +119,7 @@ const TEXTS = {
     servers: "My Servers",
     shop: "Shop",
     referral: "Referral",
+    earn: "Earn Coins",
     support: "Support",
     buy: "Buy",
     delete: "Delete",
@@ -393,6 +398,30 @@ export default function App() {
     }
   };
 
+  const handleEarn = async (type: 'daily' | 'ad' | 'survey') => {
+    const token = localStorage.getItem('fsp_token');
+    if (!token || !user) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/user/earn/${type}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage({ type: 'success', text: `Earned ${data.reward} coins!` });
+        setUser({ ...user, coins: data.coins });
+      } else {
+        setMessage({ type: 'error', text: data.error });
+      }
+    } catch (e) {
+      setMessage({ type: 'error', text: 'Error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('fsp_token');
     setUser(null);
@@ -593,6 +622,10 @@ export default function App() {
                   <Plus className="w-5 h-5" />
                   <span className="font-medium">{t.shop}</span>
                 </button>
+                <button onClick={() => setActiveTab('earn')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'earn' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'}`}>
+                  <TrendingUp className="w-5 h-5" />
+                  <span className="font-medium">{t.earn}</span>
+                </button>
                 <button onClick={() => setActiveTab('referral')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'referral' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'}`}>
                   <Users className="w-5 h-5" />
                   <span className="font-medium">{t.referral}</span>
@@ -773,6 +806,70 @@ export default function App() {
                 </div>
               )}
 
+              {activeTab === 'earn' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Daily Reward Card */}
+                  <div className="p-8 bg-zinc-800 rounded-3xl border border-white/5 flex flex-col items-center text-center group hover:border-emerald-500/30 transition-all">
+                    <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <Gift className="w-8 h-8 text-emerald-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Daily Reward</h3>
+                    <p className="text-zinc-400 text-sm mb-8">Claim your free daily coin every 24 hours just for logging in.</p>
+                    <button 
+                      onClick={() => handleEarn('daily')}
+                      disabled={loading}
+                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-900/20 transition-all flex items-center justify-center gap-3"
+                    >
+                      {loading ? <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" /> : 'Claim Reward'}
+                    </button>
+                    <div className="mt-4 flex items-center gap-2 text-xs text-zinc-500 font-bold uppercase tracking-widest">
+                      <Clock className="w-3 h-3" />
+                      <span>Available every 24h</span>
+                    </div>
+                  </div>
+
+                  {/* Watch Ad Card */}
+                  <div className="p-8 bg-zinc-800 rounded-3xl border border-white/5 flex flex-col items-center text-center group hover:border-amber-500/30 transition-all">
+                    <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <Play className="w-8 h-8 text-amber-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Watch Video</h3>
+                    <p className="text-zinc-400 text-sm mb-8">Watch a short advertisement to earn 0.5 coins instantly.</p>
+                    <button 
+                      onClick={() => handleEarn('ad')}
+                      disabled={loading}
+                      className="w-full py-4 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white rounded-2xl font-black text-lg shadow-xl shadow-amber-900/20 transition-all flex items-center justify-center gap-3"
+                    >
+                      {loading ? <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" /> : 'Watch Now'}
+                    </button>
+                    <div className="mt-4 flex items-center gap-2 text-xs text-zinc-500 font-bold uppercase tracking-widest">
+                      <TrendingUp className="w-3 h-3" />
+                      <span>Earn 0.5 Coins</span>
+                    </div>
+                  </div>
+
+                  {/* Survey Card */}
+                  <div className="p-8 bg-zinc-800 rounded-3xl border border-white/5 flex flex-col items-center text-center group hover:border-indigo-500/30 transition-all md:col-span-2">
+                    <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <MessageSquare className="w-8 h-8 text-indigo-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Complete Survey</h3>
+                    <p className="text-zinc-400 text-sm mb-8">Tell us what you think and earn 2 coins for your feedback.</p>
+                    <button 
+                      onClick={() => handleEarn('survey')}
+                      disabled={loading}
+                      className="w-full max-w-md py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-900/20 transition-all flex items-center justify-center gap-3"
+                    >
+                      {loading ? <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" /> : 'Start Survey'}
+                    </button>
+                    <div className="mt-4 flex items-center gap-2 text-xs text-zinc-500 font-bold uppercase tracking-widest">
+                      <CheckCircle2 className="w-3 h-3" />
+                      <span>Earn 2.0 Coins</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'referral' && (
                 <div className="space-y-6">
                   <div className="p-8 bg-zinc-800 rounded-3xl border border-white/5">
@@ -820,6 +917,49 @@ export default function App() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'earn' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="p-8 bg-zinc-800 rounded-3xl border border-white/5 flex flex-col items-center text-center">
+                    <Gift className="w-12 h-12 text-emerald-500 mb-4" />
+                    <h3 className="text-xl font-bold text-white mb-2">Daily Reward</h3>
+                    <p className="text-zinc-400 text-sm mb-6 flex-1">Claim your free daily coin every 24 hours.</p>
+                    <button 
+                      onClick={() => handleEarn('daily')}
+                      disabled={loading}
+                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-2xl font-black transition-all"
+                    >
+                      Claim Reward
+                    </button>
+                  </div>
+
+                  <div className="p-8 bg-zinc-800 rounded-3xl border border-white/5 flex flex-col items-center text-center">
+                    <Play className="w-12 h-12 text-amber-500 mb-4" />
+                    <h3 className="text-xl font-bold text-white mb-2">Watch Ad</h3>
+                    <p className="text-zinc-400 text-sm mb-6 flex-1">Watch a short video to earn 0.5 coins instantly.</p>
+                    <button 
+                      onClick={() => handleEarn('ad')}
+                      disabled={loading}
+                      className="w-full py-4 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white rounded-2xl font-black transition-all"
+                    >
+                      Watch Now
+                    </button>
+                  </div>
+
+                  <div className="p-8 bg-zinc-800 rounded-3xl border border-white/5 flex flex-col items-center text-center">
+                    <MessageSquare className="w-12 h-12 text-indigo-500 mb-4" />
+                    <h3 className="text-xl font-bold text-white mb-2">Complete Survey</h3>
+                    <p className="text-zinc-400 text-sm mb-6 flex-1">Share your feedback and earn 2 coins per survey.</p>
+                    <button 
+                      onClick={() => handleEarn('survey')}
+                      disabled={loading}
+                      className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-2xl font-black transition-all"
+                    >
+                      Start Survey
+                    </button>
                   </div>
                 </div>
               )}

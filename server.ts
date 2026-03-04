@@ -245,6 +245,57 @@ async function startServer() {
     }
   });
 
+  // --- Earn Coins Routes ---
+
+  // Daily Reward
+  app.post("/api/user/earn/daily", authenticate, async (req: any, res) => {
+    const user = await User.findOne({ id: req.userId });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const now = new Date();
+    const lastReward = user.last_daily_reward ? new Date(user.last_daily_reward) : null;
+
+    if (lastReward && (now.getTime() - lastReward.getTime()) < 24 * 60 * 60 * 1000) {
+      const nextReward = new Date(lastReward.getTime() + 24 * 60 * 60 * 1000);
+      return res.status(400).json({ 
+        error: "Daily reward already claimed", 
+        nextReward: nextReward.toISOString() 
+      });
+    }
+
+    const rewardAmount = 1; // 1 coin per day
+    user.coins += rewardAmount;
+    user.last_daily_reward = now;
+    await user.save();
+
+    res.json({ success: true, coins: user.coins, reward: rewardAmount });
+  });
+
+  // Watch Ad (Simulated)
+  app.post("/api/user/earn/ad", authenticate, async (req: any, res) => {
+    const user = await User.findOne({ id: req.userId });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // In a real app, you'd verify the ad completion via a callback from an ad provider
+    const rewardAmount = 0.5; 
+    user.coins += rewardAmount;
+    await user.save();
+
+    res.json({ success: true, coins: user.coins, reward: rewardAmount });
+  });
+
+  // Complete Survey (Simulated)
+  app.post("/api/user/earn/survey", authenticate, async (req: any, res) => {
+    const user = await User.findOne({ id: req.userId });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const rewardAmount = 2; 
+    user.coins += rewardAmount;
+    await user.save();
+
+    res.json({ success: true, coins: user.coins, reward: rewardAmount });
+  });
+
   // Stats for Admin
   app.get("/api/admin/stats", authenticate, isAdmin, async (req, res) => {
     const [usersCount, serversCount, devsCount, userCount, coinsSum, bannedCount] = await Promise.all([
