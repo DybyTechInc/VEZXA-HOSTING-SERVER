@@ -67,8 +67,15 @@ async function startServer() {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create Ptero User
-    const pteroUser = await ptero.createUser(userId, email);
-    if (!pteroUser) return res.status(500).json({ error: "Failed to create panel user" });
+    let pteroUser;
+    try {
+      pteroUser = await ptero.createUser(userId, email);
+    } catch (e: any) {
+      console.error("Ptero user creation error:", e);
+      return res.status(500).json({ error: "Failed to create panel user: " + (e.message || "Unknown error") });
+    }
+    
+    if (!pteroUser) return res.status(500).json({ error: "Failed to create panel user. Please check server logs." });
 
     let referrerId = null;
     if (referrerCode) {

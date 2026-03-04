@@ -101,7 +101,7 @@ class PteroAPI {
           }
         } catch (e2) {}
       }
-      console.error('createUser error:', e.message);
+      console.error('createUser error:', e.response?.data || e.message);
     }
     return null;
   }
