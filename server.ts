@@ -330,6 +330,22 @@ async function startServer() {
     res.json({ success: true });
   });
 
+  // Admin: Give coins to user(s)
+  app.post("/api/admin/give-coins", authenticate, isAdmin, async (req, res) => {
+    const { userId, amount } = req.body;
+    if (!amount || isNaN(amount)) return res.status(400).json({ error: "Invalid amount" });
+
+    if (userId === 'all') {
+      await User.updateMany({}, { $inc: { coins: amount } });
+    } else {
+      const user = await User.findOne({ id: userId });
+      if (!user) return res.status(404).json({ error: "User not found" });
+      user.coins += amount;
+      await user.save();
+    }
+    res.json({ success: true });
+  });
+
   // Admin: Ban/Unban user
   app.post("/api/admin/users/:userId/ban", authenticate, isAdmin, async (req, res) => {
     const { banned } = req.body;

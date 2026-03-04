@@ -215,6 +215,32 @@ export default function App() {
     }
   };
 
+  const handleAdminGiveCoins = async (userId: string) => {
+    const amount = prompt(`Enter amount of coins to give to ${userId === 'all' ? 'ALL users' : 'this user'}:`);
+    if (!amount || isNaN(Number(amount))) return;
+    const token = localStorage.getItem('fsp_token');
+    try {
+      const res = await fetch(`/api/admin/give-coins`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ userId, amount: parseInt(amount) }),
+      });
+      if (res.ok) {
+        setMessage({ type: 'success', text: `Successfully gave ${amount} coins!` });
+        fetchAdminData();
+      } else {
+        const data = await res.json();
+        setMessage({ type: 'error', text: data.error || 'Failed to give coins' });
+      }
+    } catch (e) {
+      console.error(e);
+      setMessage({ type: 'error', text: 'Error giving coins' });
+    }
+  };
+
   const handleAdminToggleBan = async (userId: string, currentBanned: number) => {
     const token = localStorage.getItem('fsp_token');
     try {
@@ -921,49 +947,6 @@ export default function App() {
                 </div>
               )}
 
-              {activeTab === 'earn' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-8 bg-zinc-800 rounded-3xl border border-white/5 flex flex-col items-center text-center">
-                    <Gift className="w-12 h-12 text-emerald-500 mb-4" />
-                    <h3 className="text-xl font-bold text-white mb-2">Daily Reward</h3>
-                    <p className="text-zinc-400 text-sm mb-6 flex-1">Claim your free daily coin every 24 hours.</p>
-                    <button 
-                      onClick={() => handleEarn('daily')}
-                      disabled={loading}
-                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-2xl font-black transition-all"
-                    >
-                      Claim Reward
-                    </button>
-                  </div>
-
-                  <div className="p-8 bg-zinc-800 rounded-3xl border border-white/5 flex flex-col items-center text-center">
-                    <Play className="w-12 h-12 text-amber-500 mb-4" />
-                    <h3 className="text-xl font-bold text-white mb-2">Watch Ad</h3>
-                    <p className="text-zinc-400 text-sm mb-6 flex-1">Watch a short video to earn 0.5 coins instantly.</p>
-                    <button 
-                      onClick={() => handleEarn('ad')}
-                      disabled={loading}
-                      className="w-full py-4 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white rounded-2xl font-black transition-all"
-                    >
-                      Watch Now
-                    </button>
-                  </div>
-
-                  <div className="p-8 bg-zinc-800 rounded-3xl border border-white/5 flex flex-col items-center text-center">
-                    <MessageSquare className="w-12 h-12 text-indigo-500 mb-4" />
-                    <h3 className="text-xl font-bold text-white mb-2">Complete Survey</h3>
-                    <p className="text-zinc-400 text-sm mb-6 flex-1">Share your feedback and earn 2 coins per survey.</p>
-                    <button 
-                      onClick={() => handleEarn('survey')}
-                      disabled={loading}
-                      className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-2xl font-black transition-all"
-                    >
-                      Start Survey
-                    </button>
-                  </div>
-                </div>
-              )}
-
               {activeTab === 'support' && (
                 <div className="p-12 bg-zinc-800 rounded-3xl border border-white/5 flex flex-col items-center text-center">
                   <MessageSquare className="w-16 h-16 text-emerald-500 mb-6" />
@@ -994,6 +977,21 @@ export default function App() {
                         <p className="text-xl font-black text-white">{stat.value ?? '...'}</p>
                       </div>
                     ))}
+                  </div>
+
+                  {/* Admin Actions */}
+                  <div className="p-6 bg-zinc-800 rounded-3xl border border-white/5 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-1">Global Actions</h3>
+                      <p className="text-sm text-zinc-400">Perform actions that affect all users.</p>
+                    </div>
+                    <button 
+                      onClick={() => handleAdminGiveCoins('all')}
+                      className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-bold transition-all flex items-center gap-2"
+                    >
+                      <Gift className="w-5 h-5" />
+                      Give Coins to All
+                    </button>
                   </div>
 
                   {/* Users Table */}
@@ -1039,7 +1037,10 @@ export default function App() {
                               </td>
                               <td className="px-6 py-4 text-right">
                                 <div className="flex justify-end gap-2">
-                                  <button onClick={() => handleAdminUpdateCoins(u.id)} className="p-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg transition-all" title="Edit Coins">
+                                  <button onClick={() => handleAdminGiveCoins(u.id)} className="p-2 bg-amber-600/20 hover:bg-amber-600/40 text-amber-500 rounded-lg transition-all" title="Give Coins">
+                                    <Gift className="w-4 h-4" />
+                                  </button>
+                                  <button onClick={() => handleAdminUpdateCoins(u.id)} className="p-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg transition-all" title="Set Coins">
                                     <Coins className="w-4 h-4" />
                                   </button>
                                   <button onClick={() => handleAdminToggleBan(u.id, u.is_banned)} className={`p-2 rounded-lg transition-all ${u.is_banned === 1 ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20' : 'bg-red-500/10 text-red-500 hover:bg-red-500/20'}`} title={u.is_banned === 1 ? 'Unban' : 'Ban'}>

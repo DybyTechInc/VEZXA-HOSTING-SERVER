@@ -34,18 +34,28 @@ class PteroAPI {
 
   async getAvailableAllocation() {
     try {
-      const resp = await axios.get(
-        `${this.baseUrl}/api/application/nodes/${PTERO_CONFIG.NODE_ID}/allocations`,
-        { headers: this.headers }
-      );
-      const allocations = resp.data.data || [];
-      for (const alloc of allocations) {
-        if (!alloc.attributes.assigned) {
-          return alloc.attributes.id;
+      let page = 1;
+      let totalPages = 1;
+
+      while (page <= totalPages) {
+        const resp = await axios.get(
+          `${this.baseUrl}/api/application/nodes/${PTERO_CONFIG.NODE_ID}/allocations?page=${page}&per_page=100`,
+          { headers: this.headers }
+        );
+        
+        const allocations = resp.data.data || [];
+        totalPages = resp.data.meta?.pagination?.total_pages || 1;
+
+        for (const alloc of allocations) {
+          if (!alloc.attributes.assigned) {
+            return alloc.attributes.id;
+          }
         }
+        page++;
       }
+      console.error('No unassigned allocations found on node', PTERO_CONFIG.NODE_ID);
     } catch (e: any) {
-      console.error('getAllocation error:', e.message);
+      console.error('getAllocation error:', e.response?.data || e.message);
     }
     return null;
   }
