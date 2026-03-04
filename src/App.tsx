@@ -167,6 +167,8 @@ export default function App() {
   const [adminStats, setAdminStats] = useState<any>(null);
   const [adminUsers, setAdminUsers] = useState<any[]>([]);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [joinedCh1, setJoinedCh1] = useState(false);
+  const [joinedCh2, setJoinedCh2] = useState(false);
 
   const t = lang ? TEXTS[lang] : TEXTS.en;
 
@@ -458,13 +460,99 @@ export default function App() {
     switch (step) {
       case 'lang':
         return (
-          <div className="flex flex-col items-center space-y-8">
-            <Globe className="w-16 h-16 text-emerald-500 animate-pulse" />
-            <h1 className="text-4xl font-bold tracking-tight text-white">{TEXTS.en.select_lang}</h1>
-            <div className="flex gap-4">
-              <button onClick={() => { setLang('fr'); setStep('login'); }} className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl transition-all border border-white/10 text-xl">Français</button>
-              <button onClick={() => { setLang('en'); setStep('login'); }} className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl transition-all border border-white/10 text-xl">English</button>
+          <div className="w-full max-w-md bg-zinc-900/80 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col items-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-indigo-500" />
+            <div className="w-20 h-20 bg-emerald-500/10 rounded-3xl flex items-center justify-center mb-8">
+              <Globe className="w-10 h-10 text-emerald-500 animate-pulse" />
             </div>
+            <h1 className="text-3xl font-black tracking-tight text-white mb-2 text-center">Choose Language</h1>
+            <p className="text-zinc-400 text-center mb-10">Select your preferred language to continue.</p>
+            
+            <div className="w-full space-y-4">
+              <button 
+                onClick={() => { setLang('fr'); setStep('join'); }} 
+                className="w-full group relative p-1 rounded-2xl bg-gradient-to-b from-white/10 to-transparent hover:from-emerald-500/50 hover:to-emerald-500/10 transition-all duration-300"
+              >
+                <div className="w-full bg-zinc-900/90 backdrop-blur-md px-6 py-4 rounded-xl flex items-center justify-between border border-white/5 group-hover:border-emerald-500/30 transition-all">
+                  <div className="flex items-center gap-4">
+                    <span className="text-2xl">🇫🇷</span>
+                    <span className="text-lg font-bold text-white">Français</span>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-emerald-500 transition-colors" />
+                </div>
+              </button>
+              
+              <button 
+                onClick={() => { setLang('en'); setStep('join'); }} 
+                className="w-full group relative p-1 rounded-2xl bg-gradient-to-b from-white/10 to-transparent hover:from-indigo-500/50 hover:to-indigo-500/10 transition-all duration-300"
+              >
+                <div className="w-full bg-zinc-900/90 backdrop-blur-md px-6 py-4 rounded-xl flex items-center justify-between border border-white/5 group-hover:border-indigo-500/30 transition-all">
+                  <div className="flex items-center gap-4">
+                    <span className="text-2xl">🇬🇧</span>
+                    <span className="text-lg font-bold text-white">English</span>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-indigo-500 transition-colors" />
+                </div>
+              </button>
+            </div>
+          </div>
+        );
+      case 'join':
+        return (
+          <div className="w-full max-w-md bg-zinc-900/80 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col items-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-indigo-500" />
+            <div className="w-20 h-20 bg-emerald-500/10 rounded-3xl flex items-center justify-center mb-8">
+              <MessageSquare className="w-10 h-10 text-emerald-500" />
+            </div>
+            <h1 className="text-3xl font-black tracking-tight text-white mb-2 text-center">
+              {lang === 'fr' ? 'Rejoignez nos canaux' : 'Join our channels'}
+            </h1>
+            <p className="text-zinc-400 text-center mb-8">
+              {lang === 'fr' ? 'Pour continuer, veuillez rejoindre nos canaux WhatsApp officiels.' : 'To continue, please join our official WhatsApp channels.'}
+            </p>
+            
+            <div className="w-full space-y-4 mb-8">
+              <a 
+                href="https://whatsapp.com/channel/0029VbBhFYaDuMRacb47Kl2v"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setJoinedCh1(true)}
+                className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all group ${joinedCh1 ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-zinc-800/50 hover:bg-zinc-800 border-white/5 hover:border-emerald-500/30'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#25D366]/20 rounded-xl flex items-center justify-center">
+                    <MessageSquare className="w-5 h-5 text-[#25D366]" />
+                  </div>
+                  <span className="font-bold text-white">FSP PTERO Channel 1</span>
+                </div>
+                {joinedCh1 ? <CheckCircle className="w-5 h-5 text-emerald-500" /> : <ExternalLink className="w-4 h-4 text-zinc-500 group-hover:text-emerald-500" />}
+              </a>
+
+              <a 
+                href="https://whatsapp.com/channel/0029VbC8YMi5a24BkonciG0L"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setJoinedCh2(true)}
+                className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all group ${joinedCh2 ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-zinc-800/50 hover:bg-zinc-800 border-white/5 hover:border-emerald-500/30'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#25D366]/20 rounded-xl flex items-center justify-center">
+                    <MessageSquare className="w-5 h-5 text-[#25D366]" />
+                  </div>
+                  <span className="font-bold text-white">FSP PTERO Channel 2</span>
+                </div>
+                {joinedCh2 ? <CheckCircle className="w-5 h-5 text-emerald-500" /> : <ExternalLink className="w-4 h-4 text-zinc-500 group-hover:text-emerald-500" />}
+              </a>
+            </div>
+
+            <button 
+              onClick={() => setStep('login')}
+              disabled={!joinedCh1 || !joinedCh2}
+              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:hover:bg-emerald-600 text-white rounded-2xl font-black transition-all shadow-xl shadow-emerald-900/20 flex items-center justify-center gap-2"
+            >
+              {(!joinedCh1 || !joinedCh2) && <Lock className="w-4 h-4" />}
+              {lang === 'fr' ? 'J\'ai rejoint, continuer' : 'I joined, continue'}
+            </button>
           </div>
         );
       case 'login':
