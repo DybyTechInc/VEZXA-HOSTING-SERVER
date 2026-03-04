@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PTERO_CONFIG } from '../constants';
+import { PTERO_CONFIG } from '../constants.ts';
 
 class PteroAPI {
   baseUrl: string;

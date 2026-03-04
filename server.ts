@@ -2,9 +2,9 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { connectDB, User, Server } from "./src/lib/db";
-import { ptero } from "./src/lib/ptero";
-import { PTERO_CONFIG } from "./src/constants";
+import { connectDB, User, Server } from "./src/lib/db.ts";
+import { ptero } from "./src/lib/ptero.ts";
+import { PTERO_CONFIG } from "./src/constants.ts";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fsp-secret-key-123";
 
