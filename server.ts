@@ -231,6 +231,20 @@ async function startServer() {
     }
   });
 
+  // Server Power Actions
+  app.post("/api/servers/:serverId/power", authenticate, async (req: any, res) => {
+    const { action } = req.body;
+    const server = await Server.findOne({ _id: req.params.serverId, user_id: req.userId });
+    if (!server) return res.status(404).json({ error: "Server not found" });
+
+    const success = await ptero.sendPowerAction(server.ptero_identifier, action);
+    if (success) {
+      res.json({ success: true });
+    } else {
+      res.status(500).json({ error: "Failed to send power action" });
+    }
+  });
+
   // Stats for Admin
   app.get("/api/admin/stats", authenticate, isAdmin, async (req, res) => {
     const [usersCount, serversCount, devsCount, userCount, coinsSum, bannedCount] = await Promise.all([

@@ -23,6 +23,11 @@ import {
   Lock,
   ArrowRight,
   CheckCircle,
+  Play,
+  Square,
+  RotateCcw,
+  Activity,
+  Calendar,
 } from 'lucide-react';
 import { PTERO_CONFIG } from './constants';
 
@@ -348,7 +353,7 @@ export default function App() {
     }
   };
 
-  const handleDeleteServer = async (id: number) => {
+  const handleDeleteServer = async (id: string) => {
     const token = localStorage.getItem('fsp_token');
     if (!token || !confirm(t.confirm_delete)) return;
     try {
@@ -357,6 +362,32 @@ export default function App() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       fetchServers();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handlePowerAction = async (serverId: string, action: 'start' | 'stop' | 'restart') => {
+    const token = localStorage.getItem('fsp_token');
+    if (!token) return;
+    
+    try {
+      const res = await fetch(`/api/servers/${serverId}/power`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ action }),
+      });
+      
+      if (res.ok) {
+        // Refresh status after a short delay
+        setTimeout(fetchServers, 1000);
+      } else {
+        const data = await res.json();
+        setMessage({ type: 'error', text: data.error });
+      }
     } catch (e) {
       console.error(e);
     }
@@ -376,29 +407,9 @@ export default function App() {
             <Globe className="w-16 h-16 text-emerald-500 animate-pulse" />
             <h1 className="text-4xl font-bold tracking-tight text-white">{TEXTS.en.select_lang}</h1>
             <div className="flex gap-4">
-              <button onClick={() => { setLang('fr'); setStep('join'); }} className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl transition-all border border-white/10 text-xl">Français</button>
-              <button onClick={() => { setLang('en'); setStep('join'); }} className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl transition-all border border-white/10 text-xl">English</button>
+              <button onClick={() => { setLang('fr'); setStep('login'); }} className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl transition-all border border-white/10 text-xl">Français</button>
+              <button onClick={() => { setLang('en'); setStep('login'); }} className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl transition-all border border-white/10 text-xl">English</button>
             </div>
-          </div>
-        );
-      case 'join':
-        return (
-          <div className="flex flex-col items-center space-y-8 max-w-md text-center">
-            <Users className="w-16 h-16 text-indigo-500" />
-            <h1 className="text-3xl font-bold text-white">{t.join_required}</h1>
-            <div className="flex flex-col w-full gap-3">
-              <a href={PTERO_CONFIG.TG_CHANNEL} target="_blank" className="flex items-center justify-between p-4 bg-zinc-800 rounded-xl border border-white/5 hover:border-indigo-500/50 transition-all">
-                <span className="text-white font-medium">Telegram Channel</span>
-                <ChevronRight className="w-5 h-5 text-zinc-500" />
-              </a>
-              <a href={PTERO_CONFIG.TG_GROUP} target="_blank" className="flex items-center justify-between p-4 bg-zinc-800 rounded-xl border border-white/5 hover:border-indigo-500/50 transition-all">
-                <span className="text-white font-medium">Telegram Group</span>
-                <ChevronRight className="w-5 h-5 text-zinc-500" />
-              </a>
-            </div>
-            <button onClick={() => setStep('login')} className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-lg shadow-lg shadow-emerald-900/20 transition-all">
-              {t.verify}
-            </button>
           </div>
         );
       case 'login':
@@ -618,51 +629,102 @@ export default function App() {
               )}
 
               {activeTab === 'servers' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {servers.length === 0 ? (
-                    <div className="col-span-full p-12 bg-zinc-800/50 rounded-3xl border border-dashed border-white/10 flex flex-col items-center justify-center text-center">
+                    <div className="p-12 bg-zinc-800/50 rounded-3xl border border-dashed border-white/10 flex flex-col items-center justify-center text-center">
                       <Server className="w-12 h-12 text-zinc-600 mb-4" />
                       <p className="text-zinc-400 font-medium">No servers found. Visit the shop to get one!</p>
                     </div>
                   ) : (
                     servers.map((s) => (
-                      <div key={s.id} className="p-6 bg-zinc-800 rounded-2xl border border-white/5 hover:border-white/10 transition-all space-y-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-bold text-white">{s.name}</h3>
-                            <p className="text-xs text-zinc-500 font-mono uppercase tracking-widest">{s.type}</p>
+                      <div key={s.id} className="p-6 bg-zinc-800 rounded-3xl border border-white/5 hover:border-white/10 transition-all">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${s.status?.state === 'running' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-zinc-700 text-zinc-400'}`}>
+                              <Server className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-black text-white">{s.name}</h3>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{s.type}</span>
+                                <span className="w-1 h-1 bg-zinc-700 rounded-full" />
+                                <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">{s.ptero_identifier}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${s.status?.state === 'running' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-zinc-700 text-zinc-400'}`}>
-                            {s.status?.state || 'Offline'}
-                          </div>
-                        </div>
 
-                        <div className="grid grid-cols-3 gap-2">
-                          <div className="p-2 bg-zinc-900 rounded-lg">
-                            <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">{t.cpu}</p>
-                            <p className="text-white font-mono text-sm">{s.status?.cpu.toFixed(1)}%</p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-1 max-w-2xl">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 text-[10px] text-zinc-500 uppercase font-black tracking-widest">
+                                <Activity className="w-3 h-3" />
+                                <span>Status</span>
+                              </div>
+                              <p className={`text-sm font-black uppercase ${s.status?.state === 'running' ? 'text-emerald-500' : 'text-zinc-500'}`}>
+                                {s.status?.state || 'Offline'}
+                              </p>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 text-[10px] text-zinc-500 uppercase font-black tracking-widest">
+                                <Cpu className="w-3 h-3" />
+                                <span>CPU</span>
+                              </div>
+                              <p className="text-sm text-white font-mono font-bold">{(s.status?.cpu || 0).toFixed(1)}%</p>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 text-[10px] text-zinc-500 uppercase font-black tracking-widest">
+                                <Database className="w-3 h-3" />
+                                <span>RAM</span>
+                              </div>
+                              <p className="text-sm text-white font-mono font-bold">{(s.status?.memory ? s.status.memory / 1024 / 1024 : 0).toFixed(0)}MB</p>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 text-[10px] text-zinc-500 uppercase font-black tracking-widest">
+                                <Calendar className="w-3 h-3" />
+                                <span>Expires</span>
+                              </div>
+                              <p className="text-sm text-white font-bold">{new Date(s.expires_at).toLocaleDateString()}</p>
+                            </div>
                           </div>
-                          <div className="p-2 bg-zinc-900 rounded-lg">
-                            <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">{t.ram}</p>
-                            <p className="text-white font-mono text-sm">{(s.status?.memory ? s.status.memory / 1024 / 1024 : 0).toFixed(0)}MB</p>
-                          </div>
-                          <div className="p-2 bg-zinc-900 rounded-lg">
-                            <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">ID</p>
-                            <p className="text-white font-mono text-sm truncate">{s.ptero_identifier}</p>
-                          </div>
-                        </div>
 
-                        <div className="flex items-center justify-between pt-2">
-                          <div className="flex items-center gap-2 text-xs text-zinc-500">
-                            <AlertCircle className="w-4 h-4" />
-                            <span>{t.expires}: {new Date(s.expires_at).toLocaleDateString()}</span>
-                          </div>
-                          <div className="flex gap-2">
-                            <button onClick={() => window.open(PTERO_CONFIG.PANEL_URL, '_blank')} className="p-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg transition-all">
-                              <ExternalLink className="w-4 h-4" />
+                          <div className="flex items-center gap-2">
+                            <div className="flex bg-zinc-900 p-1.5 rounded-2xl border border-white/5">
+                              <button 
+                                onClick={() => handlePowerAction(s.id, 'start')}
+                                disabled={s.status?.state === 'running'}
+                                className="p-2.5 text-zinc-500 hover:text-emerald-500 disabled:opacity-30 transition-all"
+                                title="Start"
+                              >
+                                <Play className="w-5 h-5 fill-current" />
+                              </button>
+                              <button 
+                                onClick={() => handlePowerAction(s.id, 'restart')}
+                                className="p-2.5 text-zinc-500 hover:text-amber-500 transition-all"
+                                title="Restart"
+                              >
+                                <RotateCcw className="w-5 h-5" />
+                              </button>
+                              <button 
+                                onClick={() => handlePowerAction(s.id, 'stop')}
+                                disabled={s.status?.state === 'offline'}
+                                className="p-2.5 text-zinc-500 hover:text-red-500 disabled:opacity-30 transition-all"
+                                title="Stop"
+                              >
+                                <Square className="w-5 h-5 fill-current" />
+                              </button>
+                            </div>
+                            <button 
+                              onClick={() => window.open(`${PTERO_CONFIG.PANEL_URL}/server/${s.ptero_identifier}`, '_blank')}
+                              className="p-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl border border-white/5 transition-all"
+                              title="Console"
+                            >
+                              <ExternalLink className="w-5 h-5" />
                             </button>
-                            <button onClick={() => handleDeleteServer(s.id)} className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-all">
-                              <Trash2 className="w-4 h-4" />
+                            <button 
+                              onClick={() => handleDeleteServer(s.id)}
+                              className="p-4 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl border border-red-500/20 transition-all"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-5 h-5" />
                             </button>
                           </div>
                         </div>
@@ -766,11 +828,11 @@ export default function App() {
                 <div className="p-12 bg-zinc-800 rounded-3xl border border-white/5 flex flex-col items-center text-center">
                   <MessageSquare className="w-16 h-16 text-emerald-500 mb-6" />
                   <h3 className="text-2xl font-bold text-white mb-2">Need Help?</h3>
-                  <p className="text-zinc-400 mb-8 max-w-md">Our support team is available on Telegram to help you with any issues or questions.</p>
-                  <a href={`https://t.me/${PTERO_CONFIG.SUPPORT_USERNAME.replace('@', '')}`} target="_blank" className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold text-lg transition-all flex items-center gap-3">
-                    Contact Support
-                    <ExternalLink className="w-5 h-5" />
-                  </a>
+                  <p className="text-zinc-400 mb-8 max-w-md">Our support team is available to help you with any issues or questions.</p>
+                  <div className="px-8 py-4 bg-zinc-900 border border-white/5 text-white rounded-2xl font-bold text-lg transition-all flex flex-col items-center gap-1">
+                    <span className="text-xs text-zinc-500 uppercase tracking-widest">Support Email</span>
+                    <span>support@fspptero.com</span>
+                  </div>
                 </div>
               )}
 
@@ -884,8 +946,8 @@ export default function App() {
 
       {/* Footer */}
       <footer className="relative z-10 py-8 border-t border-white/5 text-center">
-        <p className="text-zinc-600 text-sm font-medium tracking-widest uppercase">
-          &copy; 2024 {PTERO_CONFIG.BOT_NAME} &bull; Powered by Pterodactyl
+        <p className="text-zinc-600 text-[10px] font-black tracking-[0.3em] uppercase">
+          &copy; 2024 FSP PTERO &bull; Powered by Pterodactyl
         </p>
       </footer>
     </div>

@@ -3,13 +3,6 @@ import { GoogleGenAI } from "@google/genai";
 export const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export const PTERO_CONFIG = {
-  BOT_TOKEN: "8471422122:AAEKeShzlv-SRUc5VaWUSMBt4-3b7CTqcRo",
-  ADMIN_CHAT_ID: 8594388436,
-  BOT_NAME: "𝙁 𝙎 𝙋 𝙁𝙍𝙀𝙀 𝙎𝙀𝙍𝙑𝙀𝙍 𝙋𝙏𝙀𝙍𝙊",
-  BOT_LOGO: "https://files.catbox.moe/yi2r7l.jpg",
-  BOT_USERNAME: "FSP1_Bot",
-  SUPPORT_USERNAME: "@emperorsukuna1",
-
   PANEL_URL: "https://panelmrc.vezxa.com",
   PANEL_APP_KEY: "ptla_O2F0brfuGmWBNxGtwR9nyfAGw0D2JUtWZzD93ZYlvoR",
   PANEL_CLIENT_KEY: "ptlc_vHsDw9qhsKZGhmEQm8UgbwrwzbIfT0aeTmzNbcQE2oA",
@@ -17,12 +10,6 @@ export const PTERO_CONFIG = {
   EGG_ID: 15,
   NODE_ID: 1,
   DOCKER_IMAGE: "ghcr.io/parkervcp/yolks:nodejs_20",
-
-  TG_CHANNEL: "https://t.me/justforfuns1",
-  TG_CHANNEL_ID: "@justforfuns1",
-  TG_GROUP: "https://t.me/lgdsukuna",
-  TG_GROUP_ID: "@lgdsukuna",
-  WA_NEWSLETTER: "120363421455413109@newsletter",
 
   COINS_PER_REFERRAL: 2,
   COINS_FOR_NEW_USER: 3,

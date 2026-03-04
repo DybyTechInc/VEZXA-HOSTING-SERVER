@@ -204,10 +204,31 @@ class PteroAPI {
       return {
         state: resp.data.attributes.current_state,
         cpu: resp.data.attributes.resources.cpu_absolute,
-        memory: resp.data.attributes.resources.memory_bytes
+        memory: resp.data.attributes.resources.memory_bytes,
+        disk: resp.data.attributes.resources.disk_bytes
       };
     } catch (e) {
-      return { state: 'unknown', cpu: 0, memory: 0 };
+      return { state: 'unknown', cpu: 0, memory: 0, disk: 0 };
+    }
+  }
+
+  async sendPowerAction(serverIdentifier: string, action: 'start' | 'stop' | 'restart' | 'kill') {
+    const clientHeaders = {
+      'Authorization': `Bearer ${this.clientKey}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+
+    try {
+      await axios.post(
+        `${this.baseUrl}/api/client/servers/${serverIdentifier}/power`,
+        { signal: action },
+        { headers: clientHeaders }
+      );
+      return true;
+    } catch (e: any) {
+      console.error('sendPowerAction error:', e.response?.data || e.message);
+      return false;
     }
   }
 
