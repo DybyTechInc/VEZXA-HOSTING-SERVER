@@ -1176,7 +1176,7 @@ export default function App() {
       {/* Footer */}
       <footer className="relative z-10 py-8 border-t border-white/5 text-center">
         <p className="text-zinc-600 text-[10px] font-black tracking-[0.3em] uppercase">
-          &copy; 2024 FSP PTERO &bull; Powered by Pterodactyl
+          &copy; 𝙿𝙾𝚆𝙴𝚁𝙴𝙳 𝙱𝚈 𝙳𝙴𝚅 𝙳𝚈𝙱𝚈
         </p>
       </footer>
     </div>
